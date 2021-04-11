@@ -114,6 +114,38 @@ def get_interface_addresses(name, namespace=None):
     return
 
 
+def get_interface_statistics(name, namespace=None):
+    in_namespace = ''
+    if namespace:
+        in_namespace = 'ip netns exec %s ' % namespace
+
+    stdout, _ = execute(None,
+                        '%(in_namespace)sip -s link show %(name)s'
+                        % {
+                            'in_namespace': in_namespace,
+                            'name': name
+                        },
+                        check_exit_code=[0, 1])
+
+    if not stdout:
+        raise exceptions.NoInterfaceStatistics(
+            'No statistics for interface %s in namespace %s' % (name, namespace))
+
+    # 153: veth-ecd8c1-o@if152: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ...
+    #     link/ether 46:e0:7d:84:2f:e7 brd ff:ff:ff:ff:ff:ff link-netns ...
+    #     RX: bytes  packets  errors  dropped overrun mcast
+    #     1238579182 778911   0       0       0       0
+    #     TX: bytes  packets  errors  dropped carrier collsns
+    #     28344386   393943   0       0       0       0
+    lines = stdout.split('\n')
+    rx_dict = dict(zip(['bytes', 'packets', 'errors',
+                        'dropped', 'overrun', 'multicast'], lines[3].split()))
+    tx_dict = dict(zip(['bytes', 'packets', 'errors',
+                        'dropped', 'carrier', 'collisions'], lines[5].split()))
+
+    return {'recieve': rx_dict, 'transit': tx_dict}
+
+
 def get_default_routes(namespace):
     in_namespace = ''
     if namespace:

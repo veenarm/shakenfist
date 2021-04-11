@@ -90,7 +90,7 @@ def check_for_interface(name, namespace=None, up=False):
     return True
 
 
-def get_interface_addresses(namespace, name):
+def get_interface_addresses(name, namespace=None):
     in_namespace = ''
     if namespace:
         in_namespace = 'ip netns exec %s ' % namespace

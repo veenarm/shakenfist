@@ -47,7 +47,7 @@ class UtilTestCase(test_shakenfist.ShakenFistTestCase):
         'shakenfist.util.execute',
         return_value=(None, 'Device "banana0" does not exist.'))
     def test_get_interface_addresses_missing_interface(self, mock_execute):
-        found = list(util.get_interface_addresses(None, 'eth0'))
+        found = list(util.get_interface_addresses('eth0'))
         self.assertEqual([], found)
         mock_execute.assert_called_with(None, 'ip addr show eth0',
                                         check_exit_code=[0, 1])
@@ -63,7 +63,7 @@ class UtilTestCase(test_shakenfist.ShakenFistTestCase):
             '       valid_lft forever preferred_lft forever\n',
             ''))
     def test_get_interface_addresses_no_namespace(self, mock_execute):
-        found = list(util.get_interface_addresses(None, 'eth0'))
+        found = list(util.get_interface_addresses('eth0'))
         self.assertEqual(['192.168.1.28'], found)
         mock_execute.assert_called_with(None, 'ip addr show eth0',
                                         check_exit_code=[0, 1])
@@ -79,7 +79,8 @@ class UtilTestCase(test_shakenfist.ShakenFistTestCase):
             '       valid_lft forever preferred_lft forever\n',
             ''))
     def test_get_interface_addresses_namespace(self, mock_execute):
-        found = list(util.get_interface_addresses('bananarama', 'eth0'))
+        found = list(util.get_interface_addresses(
+            'eth0', namespace='bananarama'))
         self.assertEqual(['192.168.1.28'], found)
         mock_execute.assert_called_with(
             None, 'ip netns exec bananarama ip addr show eth0',

@@ -209,4 +209,4 @@ not_dead_states_filter = partial(
         Artifact.STATE_INITIAL,
         Artifact.STATE_CREATING,
         Artifact.STATE_CREATED,
-        ])
+    ])

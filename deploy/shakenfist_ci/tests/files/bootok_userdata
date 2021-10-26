@@ -1,0 +1,4 @@
+#cloud-config
+
+runcmd:
+  - echo "System booted ok" > /dev/console

@@ -1,5 +1,7 @@
+import base64
 import copy
 import datetime
+import os
 import random
 from socket import error as socket_error
 import string
@@ -29,6 +31,12 @@ class WrongEventException(Exception):
 # downloads can be while my ISP is congested because of COVID. We should
 # turn this back down as things improve.
 NETWORK_PATIENCE_FACTOR = 3
+
+
+def load_userdata(name):
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    with open('%s/files/%s_userdata' % (test_dir, name)) as f:
+        return base64.b64encode(f.read().encode('utf-8')).decode('utf-8')
 
 
 class BaseTestCase(testtools.TestCase):
@@ -251,6 +259,13 @@ class BaseTestCase(testtools.TestCase):
     def assertInstanceOk(self, instance_uuid):
         inst = self.system_client.get_instance(instance_uuid)
         self.assertTrue(inst['state'] == 'created')
+
+    def assertInstanceConsoleAfterBoot(self, instance_uuid, contains):
+        self.assertIsNotNone(instance_uuid)
+        self._await_instances_ready([instance_uuid])
+        time.sleep(30)
+        console = self.test_client.get_console_data(instance_uuid, 1000000)
+        self.assertNotEqual(-1, console.find(contains))
 
 
 class BaseNamespacedTestCase(BaseTestCase):
